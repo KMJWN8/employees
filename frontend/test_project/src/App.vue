@@ -6,6 +6,13 @@
         <div class="my-3 mx-8 text-2xl font-bold text-amber-50">
             ГИС учета сотрудников
         </div>
+        <input
+          class="bg-white my-4 ml-150 rounded-md pr-2 pl-2 "
+          placeholder="Поиск"
+          type="text"
+          v-model="searchQuery"
+          @input="searchEmployees"
+        />
       </el-header>
       <el-container class="flex-1">
         <el-aside class="shadow-md">
@@ -139,6 +146,18 @@ const collectEmployees = (node) => {
 
     recurse(node)
     return employees
+}
+
+const searchQuery = ref('')
+
+const searchEmployees = async () => {
+  try {
+    const response = await axios.get(`http://127.0.0.1:8000/api/employees/?search=${searchQuery.value}`)
+    selectedEmployees.value = response.data;
+  } catch (error) {
+    console.error('Ошибка при поиске сотрудников:', error)
+    selectedEmployees.value = []
+  }
 }
 
 // Вызов функции загрузки данных при инициализации

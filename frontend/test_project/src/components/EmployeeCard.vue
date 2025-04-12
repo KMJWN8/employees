@@ -58,7 +58,9 @@ const formatDate = (dateString) => {
 
 const getPhotoUrl = (photoPath) => {
   if (!photoPath) return null
-  return photoPath.startsWith('http') ? photoPath : `http://127.0.0.1:8000${photoPath}`
+  let url = photoPath.startsWith('http') ? photoPath : `http://127.0.0.1:8000${photoPath}`
+  const timestamp = new Date().getTime();
+  return `${url}?${timestamp}`; // Добавляем уникальный параметр
 }
 
 const deleteEmployee = async () => {

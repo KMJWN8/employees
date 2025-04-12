@@ -53,7 +53,7 @@
             <label class="block text-gray-700">Фото сотрудника</label>
             <input
               type="file"
-              @change="photoUpload"
+              @change="addPhotoUpload"
               class="w-full border border-gray-300 rounded px-3 py-2"
               required
             />
@@ -127,6 +127,14 @@
         />
       </div>
       <div class="mb-4">
+          <label class="block text-gray-700">Фото сотрудника</label>
+          <input
+            type="file"
+            @change="editPhotoUpload"
+            class="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+      <div class="mb-4">
         <label class="block text-gray-700">Дата рождения</label>
         <input
           v-model="editedEmployee.date_of_birth"
@@ -190,7 +198,7 @@ const newEmployee = ref({
   photo: null,
 })
 
-const photoUpload = (event) => {
+const addPhotoUpload = (event) => {
   const file = event.target.files[0]
   newEmployee.value.photo = file
 }
@@ -289,6 +297,12 @@ const deleteEmployee = (employeeId) => {
 
 const isEditModalOpen = ref(false)
 const editedEmployee = ref(null)
+const editedFile = ref(null);
+
+const editPhotoUpload = (event) => {
+  const file = event.target.files[0]
+  editedFile.value = file; // Сохраняем выбранный файл
+}
 
 const editEmployee = (employee) => {
   editedEmployee.value = { ...employee } // Создаем копию сотрудника
@@ -297,20 +311,35 @@ const editEmployee = (employee) => {
 
 const closeEditModal = () => {
   isEditModalOpen.value = false
-  editedEmployee.value = null
+  editedFile.value = null
+  resetForm()
 }
 
 const saveEditedEmployee = async () => {
-  try {
-    await axios.put(`http://127.0.0.1:8000/api/employees/${editedEmployee.value.id}/`, editedEmployee.value, photo = null)
-    // Обновляем локальный массив
-    const index = localEmployees.value.findIndex(emp => emp.id === editedEmployee.value.id)
-    if (index !== -1) {
-      localEmployees.value[index] = { ...editedEmployee.value }
+  const formData = new FormData()
+    formData.append('full_name', editedEmployee.value.full_name)
+    formData.append('position', editedEmployee.value.position)
+    formData.append('date_of_birth', editedEmployee.value.date_of_birth)
+    formData.append('start_date', editedEmployee.value.start_date)
+
+    if (editedFile.value) {
+      formData.append('photo', editedFile.value) // Добавляем файл в FormData
     }
-    closeEditModal()
-  } catch (error) {
-    console.error('Ошибка при редактировании сотрудника:', error.response?.data)
-  }
+
+    const response = await axios.put(`http://127.0.0.1:8000/api/employees/${editedEmployee.value.id}/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+        // Обновляем локальный массив
+    const index = localEmployees.value.findIndex(emp => emp.id === editedEmployee.value.id);
+    if (index !== -1) {
+      localEmployees.value[index] = response.data
+    }
+    closeEditModal();
+
+    emit('refresh-tree')
+
 }
 </script>

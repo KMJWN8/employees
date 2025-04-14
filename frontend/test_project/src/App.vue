@@ -7,7 +7,7 @@
             ГИС учета сотрудников
         </div>
         <input
-          class="bg-white my-4 ml-150 rounded-md pr-2 pl-2 "
+          class="bg-white my-4 rounded-md pr-2 pl-2 "
           placeholder="Поиск"
           type="text"
           v-model="searchQuery"

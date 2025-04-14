@@ -2,16 +2,30 @@
   <div>
     <div class="flex justify-between items-center mb-4">
       <h3 v-if="localEmployees.length" class="text-xl font-bold text-gray-800">Список сотрудников</h3>
+      <el-select 
+        v-model="selectedOrdering"
+        class="object-right"
+        style="width: 300px;"
+        placeholder="Сортировка" 
+        @change="orderEmployees"
+        clearable
+        @clear="resetOrdering">
+        <el-option
+          v-for="item in orderingOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
       <button
-
         @click="openAddEmployeeModal"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded object-right"
       >
         Добавить сотрудника
       </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
       <!-- Карточки сотрудников -->
       <EmployeeCard
         v-for="employee in localEmployees"
@@ -172,6 +186,7 @@
 <script setup>
 import { ref, computed, watch} from 'vue'
 import axios from 'axios'
+
 import EmployeeCard from './EmployeeCard.vue'
 
 const props = defineProps({
@@ -339,7 +354,39 @@ const saveEditedEmployee = async () => {
     }
     closeEditModal();
 
-    emit('refresh-tree')
+    emit('refresh-employees')
+}
 
+// Reactive variable for the selected API endpoint
+const selectedOrdering = ref(null)
+
+// Sorting options for the dropdown
+const orderingOptions = [
+  { value: 'http://127.0.0.1:8000/api/employees/?ordering=date_of_birth', label: 'Дата рождения (возрастание)' },
+  { value: 'http://127.0.0.1:8000/api/employees/?ordering=-date_of_birth', label: 'Дата рождения (убывание)' },
+  { value: 'http://127.0.0.1:8000/api/employees/?ordering=start_date', label: 'Дата начала работы (возрастание)' },
+  { value: 'http://127.0.0.1:8000/api/employees/?ordering=-start_date', label: 'Дата начала работы (убывание)' },
+]
+
+
+const orderEmployees = async () => {
+  console.log('Ordering employees')
+  const response = await axios.get(selectedOrdering.value)
+  console.log('Array got')
+  console.log(response.data)
+
+  const buf = response.data
+  console.log(buf)
+
+  const commonElements = buf.filter(employee1 =>
+    localEmployees.value.some(employee2 => employee1.id === employee2.id)
+  )
+  console.log(commonElements)
+  localEmployees.value = commonElements
+}
+
+const resetOrdering = () => {
+  emit('refresh-employees')
+  localEmployees.value = props.employees
 }
 </script>

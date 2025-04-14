@@ -162,7 +162,5 @@ const submitForm = async () => {
     --el-tree-node-hover-bg-color: #00ABE1 !important;
   }
 
-  .el-button--primary {
-    --el-button-bg-color: #161F6D !important; 
-  }
+ 
 </style>

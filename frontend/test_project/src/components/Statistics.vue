@@ -23,7 +23,7 @@
     </ul>
   </div>
 
-  <div v-else class="p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+  <div v-else class="p-6">
     <p class="text-gray-600 text-center flex items-center justify-center">
       <img src="@/assets/icons/info.png" alt="Информация" class="w-5 h-5 mr-2" />
       Выберите подразделение для просмотра статистики.

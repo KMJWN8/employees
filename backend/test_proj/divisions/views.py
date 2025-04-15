@@ -119,7 +119,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ["full_name"]
+    search_fields = ['full_name', 'position']
     ordering_fields = ['date_of_birth', 'start_date']
     ordering = ['date_of_birth', 'start_date']
 

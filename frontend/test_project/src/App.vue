@@ -23,7 +23,7 @@
           />
         </el-aside>
         <el-main>
-          <Statistics :statistics="currentStatistics" />
+          <Statistics v-if="selectedEmployees.length" :statistics="currentStatistics" />
           <div class="scrollable-content">
             <EmployeeList 
             :employees="selectedEmployees"
@@ -123,13 +123,6 @@ const collectEmployees = (node) => {
     const seenIds = new Set()
 
     function recurse(currentNode) {
-        if (currentNode.leader) {
-            if (!seenIds.has(currentNode.leader.id)) {
-                employees.push(currentNode.leader)
-                seenIds.add(currentNode.leader.id)
-            }
-        }
-
         if (currentNode.members) {
             currentNode.members.forEach(member => {
                 if (!seenIds.has(member.id)) {

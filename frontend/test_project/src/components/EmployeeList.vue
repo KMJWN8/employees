@@ -1,15 +1,16 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-4">
-      <h3 v-if="localEmployees.length" class="text-xl font-bold text-gray-800">Список сотрудников</h3>
+    <div v-if="selectedNode && localEmployees.length" class="flex justify-between items-center mb-4 mt-6">
+      <h3 class="text-xl font-bold text-gray-800 object-left">Список сотрудников</h3>
+      <div>
       <el-select 
         v-model="selectedOrdering"
-        class="object-right"
         style="width: 300px;"
+        class="mr-2"
         placeholder="Сортировка" 
         @change="orderEmployees"
         clearable
-        @clear="resetOrdering">
+        @clear="resetOrderingFiltering">
         <el-option
           v-for="item in orderingOptions"
           :key="item.value"
@@ -17,13 +18,30 @@
           :value="item.value"
         />
       </el-select>
+      <el-select 
+        v-model="selectedFilter"
+        style="width: 300px;"
+        placeholder="Фильтрация" 
+        @change="filterEmployees"
+        clearable
+        @clear="resetOrderingFiltering">
+        <el-option
+          v-for="item in filteringOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
+      </div>
       <button
         @click="openAddEmployeeModal"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded object-right"
+        class="bg-[#161F6D] hover:bg-blue-700 text-amber-50 font-bold py-2 px-4 rounded object-right"
       >
         Добавить сотрудника
       </button>
+
     </div>
+    <div v-else class="text-black text-xl m-6"> Выберите подразделение </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
       <!-- Карточки сотрудников -->
@@ -36,7 +54,7 @@
       />
     </div>
 
-    <div v-if="!localEmployees.length" class="text-center text-gray-500">
+    <div v-if="!localEmployees.length && selectedNode" class="text-center text-gray-500">
       <p class="mt-5">Нет сотрудников в этом подразделении.</p>
     </div>
 
@@ -268,24 +286,24 @@ watch(
 )
 
 const addEmployee = async () => {
-  const formData = new FormData();
-  formData.append('full_name', newEmployee.value.full_name);
-  formData.append('position', newEmployee.value.position);
-  formData.append('date_of_birth', newEmployee.value.date_of_birth);
-  formData.append('start_date', newEmployee.value.start_date);
-  formData.append('team', newEmployee.value.team);
+  const formData = new FormData()
+  formData.append('full_name', newEmployee.value.full_name)
+  formData.append('position', newEmployee.value.position)
+  formData.append('date_of_birth', newEmployee.value.date_of_birth)
+  formData.append('start_date', newEmployee.value.start_date)
+  formData.append('team', newEmployee.value.team)
 
   if (newEmployee.value.photo) {
-    formData.append('photo', newEmployee.value.photo); // Добавляем файл в FormData
+    formData.append('photo', newEmployee.value.photo)// Добавляем файл в FormData
   }
 
   const response = await axios.post('http://127.0.0.1:8000/api/employees/', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    });
+    })
 
-  console.log('Сотрудник добавлен:', response.data);
+  console.log('Сотрудник добавлен:', response.data)
 
   const employeeId = response.data.id // Получаем ID созданного сотрудника
 
@@ -312,11 +330,11 @@ const deleteEmployee = (employeeId) => {
 
 const isEditModalOpen = ref(false)
 const editedEmployee = ref(null)
-const editedFile = ref(null);
+const editedFile = ref(null)
 
 const editPhotoUpload = (event) => {
   const file = event.target.files[0]
-  editedFile.value = file; // Сохраняем выбранный файл
+  editedFile.value = file // Сохраняем выбранный файл
 }
 
 const editEmployee = (employee) => {
@@ -348,11 +366,11 @@ const saveEditedEmployee = async () => {
     })
 
         // Обновляем локальный массив
-    const index = localEmployees.value.findIndex(emp => emp.id === editedEmployee.value.id);
+    const index = localEmployees.value.findIndex(emp => emp.id === editedEmployee.value.id)
     if (index !== -1) {
       localEmployees.value[index] = response.data
     }
-    closeEditModal();
+    closeEditModal()
 
     emit('refresh-employees')
 }
@@ -370,13 +388,9 @@ const orderingOptions = [
 
 
 const orderEmployees = async () => {
-  console.log('Ordering employees')
   const response = await axios.get(selectedOrdering.value)
-  console.log('Array got')
-  console.log(response.data)
 
   const buf = response.data
-  console.log(buf)
 
   const commonElements = buf.filter(employee1 =>
     localEmployees.value.some(employee2 => employee1.id === employee2.id)
@@ -385,8 +399,31 @@ const orderEmployees = async () => {
   localEmployees.value = commonElements
 }
 
-const resetOrdering = () => {
+const resetOrderingFiltering = () => {
   emit('refresh-employees')
   localEmployees.value = props.employees
 }
+
+const selectedFilter = ref(null)
+
+const filteringOptions = [
+  {value: 'http://127.0.0.1:8000/api/employees/?search=Инженер', label: 'Инженер'},
+  {value: 'http://127.0.0.1:8000/api/employees/?search=Старший&инженер', label: 'Старший инженер'},
+  {value: 'http://127.0.0.1:8000/api/employees/?search=Разработчик', label: 'Разработчик'},
+  {value: 'http://127.0.0.1:8000/api/employees/?search=Архитектор ПО', label: 'Архитектор ПО'},
+  {value: 'http://127.0.0.1:8000/api/employees/?search=Руководитель', label: 'Руководитель'},
+]
+
+const filterEmployees = async () => {
+  const response = await axios.get(selectedFilter.value)
+
+  const buf = response.data
+
+  const commonElements = buf.filter(employee1 =>
+    localEmployees.value.some(employee2 => employee1.id === employee2.id)
+  )
+  console.log(commonElements)
+  localEmployees.value = commonElements
+}
+
 </script>

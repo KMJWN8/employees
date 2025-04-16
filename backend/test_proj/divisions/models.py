@@ -3,14 +3,10 @@ from django.db import models
 
 class EmployeeContainerMixin:
     """
-    Миксин для моделей, которые содержат сотрудников и дочерние подразделения.
     Предоставляет метод get_all_employees для получения всех сотрудников.
     """
 
     def get_all_employees(self):
-        """
-        Возвращает всех сотрудников, включая дочерние подразделения.
-        """
         employees = []
         # Определяем связь с дочерними подразделениями
         child_relation = None
@@ -80,9 +76,6 @@ class Team(models.Model):
     members = models.ManyToManyField(Employee, related_name="team_members", blank=True)
 
     def get_all_employees(self):
-        """
-        Возвращает всех сотрудников группы.
-        """
         return list(self.members.all())
 
     def __str__(self):

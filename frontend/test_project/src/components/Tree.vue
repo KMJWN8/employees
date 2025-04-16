@@ -89,12 +89,12 @@ const rightClick = (event, node) => {
 }
 
 const openForm = (mode) => {
-  formMode.value = mode;
+  formMode.value = mode
   formTitle.value = mode === 'add' ? 'Добавить дочерний узел' : 'Редактировать узел'
   form.value.name = mode === 'edit' ? selectedNode.value.label : ''
   formDialogVisible.value = true
   contextMenu.value.visible = false
-};
+}
 
 const submitForm = async () => {
   if (formMode.value === 'add') {
@@ -104,18 +104,18 @@ const submitForm = async () => {
       case 'service':
         parentKey = 'service'
         childKey = 'department'
-        break;
+        break
       case 'department':
         parentKey = 'department'
         childKey = 'division'
-        break;
+        break
       case 'division':
         parentKey = 'division'
         childKey = 'team'
-        break;
+        break
       default:
         console.log('Неизвестный тип узла')
-        return;
+        return
     }
 
     const url = `http://127.0.0.1:8000/api/${childKey}s/`
@@ -128,12 +128,14 @@ const submitForm = async () => {
   
   emit('refresh-tree', expandedKeys.value)
     formDialogVisible.value = false
-  };
+  }
   
   const deleteNode = async () => {
-  if (!selectedNode.value) return
+    if (!selectedNode.value) return
+
     const url = `http://127.0.0.1:8000/api/${selectedNode.value.type}s/${selectedNode.value.id}/`
     await axios.delete(url)
+    
     emit('refresh-tree', expandedKeys.value)
     contextMenu.value.visible = false
   }

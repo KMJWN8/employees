@@ -23,7 +23,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 class TeamSerializer(WritableNestedModelSerializer):
     members = EmployeeSerializer(many=True, required=False)
-
     class Meta:
         model = Team
         fields = ["id", "name", "members", "division"]
@@ -34,7 +33,6 @@ class TeamSerializer(WritableNestedModelSerializer):
 
 class DivisionSerializer(WritableNestedModelSerializer):
     teams = serializers.SerializerMethodField()
-
     class Meta:
         model = Division
         fields = ["id", "name", "teams", "department"]
@@ -45,7 +43,6 @@ class DivisionSerializer(WritableNestedModelSerializer):
 
 class DepartmentSerializer(WritableNestedModelSerializer):
     divisions = serializers.SerializerMethodField()
-
     class Meta:
         model = Department
         fields = ["id", "name", "divisions", "service"]
@@ -56,7 +53,6 @@ class DepartmentSerializer(WritableNestedModelSerializer):
 
 class ServiceSerializer(WritableNestedModelSerializer):
     departments = serializers.SerializerMethodField()
-
     class Meta:
         model = Service
         fields = ["id", "name", "departments"]

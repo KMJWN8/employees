@@ -40,11 +40,9 @@ class ServiceViewSet(viewsets.ModelViewSet, EmployeesMixin):
     @action(detail=True, methods=["get"], url_path="statistics")
     def statistics(self, request, pk=None):
         service = self.get_object()
-        # Получаем всех сотрудников службы
         employees = service.get_all_employees()
-        # Используем универсальную функцию для получения статистики
         stats = get_statistics(employees)
-        # Возвращаем результат
+
         return Response(stats)
 
 
@@ -55,11 +53,9 @@ class DepartmentViewSet(viewsets.ModelViewSet, EmployeesMixin):
     @action(detail=True, methods=["get"], url_path="statistics")
     def statistics(self, request, pk=None):
         department = self.get_object()
-        # Получаем всех сотрудников подразделения
         employees = department.get_all_employees()
-        # Используем универсальную функцию для получения статистики
         stats = get_statistics(employees)
-        # Возвращаем результат
+
         return Response(stats)
 
 
@@ -70,11 +66,9 @@ class DivisionViewSet(viewsets.ModelViewSet, EmployeesMixin):
     @action(detail=True, methods=["get"], url_path="statistics")
     def statistics(self, request, pk=None):
         division = self.get_object()
-        # Получаем всех сотрудников службы
         employees = division.get_all_employees()
-        # Используем универсальную функцию для получения статистики
         stats = get_statistics(employees)
-        # Возвращаем результат
+
         return Response(stats)
 
 
@@ -85,11 +79,9 @@ class TeamViewSet(viewsets.ModelViewSet, EmployeesMixin):
     @action(detail=True, methods=["get"], url_path="statistics")
     def statistics(self, request, pk=None):
         team = self.get_object()
-        # Получаем всех сотрудников службы
         employees = team.get_all_employees()
-        # Используем универсальную функцию для получения статистики
         stats = get_statistics(employees)
-        # Возвращаем результат
+
         return Response(stats)
 
     @action(detail=True, methods=["patch"], url_path="add-member")
@@ -125,16 +117,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
 
 def get_statistics(employees):
-    """
-    Возвращает статистику для переданного списка сотрудников:
-    - Количество сотрудников.
-    - Средний возраст сотрудников.
-    - Средний стаж работы.
-    """
     employee_count = len(employees)
 
     if employee_count == 0:
-        # Если нет сотрудников, возвращаем нулевые значения
         return {
             "employee_count": 0,
             "average_age": 0,

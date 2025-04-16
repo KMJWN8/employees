@@ -274,7 +274,7 @@ const resetForm = () => {
   }
 }
 
-// Создаем локальную копию массива
+
 const localEmployees = ref([...props.employees])
 
 // Наблюдаем за изменениями props.employees
@@ -294,7 +294,7 @@ const addEmployee = async () => {
   formData.append('team', newEmployee.value.team)
 
   if (newEmployee.value.photo) {
-    formData.append('photo', newEmployee.value.photo)// Добавляем файл в FormData
+    formData.append('photo', newEmployee.value.photo)
   }
 
   const response = await axios.post('http://127.0.0.1:8000/api/employees/', formData, {
@@ -305,25 +305,21 @@ const addEmployee = async () => {
 
   console.log('Сотрудник добавлен:', response.data)
 
-  const employeeId = response.data.id // Получаем ID созданного сотрудника
-
-  // Шаг 2: Добавляем сотрудника в выбранную группу через PATCH
+  const employeeId = response.data.id 
+  
   const teamId = newEmployee.value.team
   await axios.patch(`http://127.0.0.1:8000/api/teams/${teamId}/add-member/`, {
     member_id: employeeId,
   })
-  // Добавляем сотрудника в локальный список
+  
   localEmployees.value.push(response.data)
 
-  // Закрыть модальное окно и очистить форму
   closeModal()
 
-  // Обновить список сотрудников
   emit('refresh-employees')
 }
 
 const deleteEmployee = (employeeId) => {
-  // Удаляем сотрудника из локального массива
   localEmployees.value = localEmployees.value.filter(emp => emp.id !== employeeId)
   emit('refresh-employees')
 }
@@ -334,11 +330,11 @@ const editedFile = ref(null)
 
 const editPhotoUpload = (event) => {
   const file = event.target.files[0]
-  editedFile.value = file // Сохраняем выбранный файл
+  editedFile.value = file
 }
 
 const editEmployee = (employee) => {
-  editedEmployee.value = { ...employee } // Создаем копию сотрудника
+  editedEmployee.value = { ...employee }
   isEditModalOpen.value = true
 }
 
@@ -356,29 +352,29 @@ const saveEditedEmployee = async () => {
     formData.append('start_date', editedEmployee.value.start_date)
 
     if (editedFile.value) {
-      formData.append('photo', editedFile.value) // Добавляем файл в FormData
+      formData.append('photo', editedFile.value)
     }
 
-    const response = await axios.put(`http://127.0.0.1:8000/api/employees/${editedEmployee.value.id}/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+  const response = await axios.put(`http://127.0.0.1:8000/api/employees/${editedEmployee.value.id}/`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
 
         // Обновляем локальный массив
-    const index = localEmployees.value.findIndex(emp => emp.id === editedEmployee.value.id)
-    if (index !== -1) {
-      localEmployees.value[index] = response.data
-    }
-    closeEditModal()
+  const index = localEmployees.value.findIndex(emp => emp.id === editedEmployee.value.id)
 
-    emit('refresh-employees')
+  if (index !== -1) {
+    localEmployees.value[index] = response.data
+  }
+
+  closeEditModal()
+
+  emit('refresh-employees')
 }
 
-// Reactive variable for the selected API endpoint
 const selectedOrdering = ref(null)
 
-// Sorting options for the dropdown
 const orderingOptions = [
   { value: 'http://127.0.0.1:8000/api/employees/?ordering=date_of_birth', label: 'Дата рождения (возрастание)' },
   { value: 'http://127.0.0.1:8000/api/employees/?ordering=-date_of_birth', label: 'Дата рождения (убывание)' },
@@ -395,7 +391,7 @@ const orderEmployees = async () => {
   const commonElements = buf.filter(employee1 =>
     localEmployees.value.some(employee2 => employee1.id === employee2.id)
   )
-  console.log(commonElements)
+
   localEmployees.value = commonElements
 }
 
@@ -422,7 +418,7 @@ const filterEmployees = async () => {
   const commonElements = buf.filter(employee1 =>
     localEmployees.value.some(employee2 => employee1.id === employee2.id)
   )
-  console.log(commonElements)
+
   localEmployees.value = commonElements
 }
 

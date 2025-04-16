@@ -45,10 +45,8 @@ import Tree from './components/Tree.vue'
 import EmployeeList from './components/EmployeeList.vue'
 import Statistics from './components/Statistics.vue'
 
-// Инициализация данных
+
 const treeData = ref([])
-const selectedEmployees = ref([])
-const currentStatistics = ref(null)
 
 const transformData = (apiData) => {
   return apiData.map((service) => ({
@@ -80,40 +78,36 @@ const fetchData = async (expandedKeys = []) => {
   expandedKeys.forEach(key => expandedKeys.value.push(key))
 }
 
-const selectedNode = ref(null);
+const selectedNode = ref(null)
+const selectedEmployees = ref([])
+const currentStatistics = ref(null)
 
 const onNodeSelected = async (node) => {
   selectedNode.value = node // Сохраняем выбранный узел
   selectedEmployees.value = collectEmployees(node)
 
-  try {
-    let url = ''
-
+  let url = ''
     // Формируем URL в зависимости от типа узла
-    switch (node.type) {
-      case 'service':
-        url = `http://127.0.0.1:8000/api/services/${node.id}/statistics/`
-        break
-      case 'department':
-        url = `http://127.0.0.1:8000/api/departments/${node.id}/statistics/`
-        break
-      case 'division':
-        url = `http://127.0.0.1:8000/api/divisions/${node.id}/statistics/`
-        break
-      case 'team':
-        url = `http://127.0.0.1:8000/api/teams/${node.id}/statistics/`
-        break
-      default:
-        console.error('Неизвестный тип узла:', node.type)
-        return
-    }
-
-    const response = await axios.get(url)
-    currentStatistics.value = response.data
-  } catch (error) {
-    console.error('Ошибка при получении статистики:', error)
-    currentStatistics.value = null
+  switch (node.type) {
+    case 'service':
+      url = `http://127.0.0.1:8000/api/services/${node.id}/statistics/`
+      break
+    case 'department':
+      url = `http://127.0.0.1:8000/api/departments/${node.id}/statistics/`
+      break
+    case 'division':
+      url = `http://127.0.0.1:8000/api/divisions/${node.id}/statistics/`
+      break
+    case 'team':
+      url = `http://127.0.0.1:8000/api/teams/${node.id}/statistics/`
+      break
+    default:
+      console.error('Неизвестный тип узла:', node.type)
+      return
   }
+
+  const response = await axios.get(url)
+  currentStatistics.value = response.data
 }
 
 
@@ -144,17 +138,13 @@ const collectEmployees = (node) => {
 const searchQuery = ref('')
 
 const searchEmployees = async () => {
-  try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/employees/?search=${searchQuery.value}`)
-    selectedEmployees.value = response.data;
-  } catch (error) {
-    console.error('Ошибка при поиске сотрудников:', error)
-    selectedEmployees.value = []
-  }
+  const response = await axios.get(`http://127.0.0.1:8000/api/employees/?search=${searchQuery.value}`)
+  selectedEmployees.value = response.data;
 }
 
 // Вызов функции загрузки данных при инициализации
 fetchData()
+
 </script>
 
 <style>

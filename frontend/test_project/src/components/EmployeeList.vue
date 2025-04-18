@@ -35,7 +35,7 @@
       </div>
       <button
         @click="openAddEmployeeModal"
-        class="bg-[#161F6D] hover:bg-blue-700 text-amber-50 font-bold py-2 px-4 rounded object-right"
+        class="bg-[#161F6D] hover:bg-blue-700 text-amber-50 font-bold py-2 px-4 rounded"
       >
         Добавить сотрудника
       </button>
@@ -43,6 +43,7 @@
     </div>
     <div v-else-if="!selectedNode" class="text-black text-xl m-6"> Выберите подразделение </div>
 
+    <div class="scrollable-content">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
       <!-- Карточки сотрудников -->
       <EmployeeCard
@@ -52,6 +53,7 @@
         @delete-employee="deleteEmployee"
         @edit-employee="editEmployee"
       />
+    </div>
     </div>
 
     <div v-if="!localEmployees.length && selectedNode" class="text-center text-gray-500">
@@ -134,7 +136,7 @@
         </form>
       </div>
     </div>
- 
+
     <!-- Модальное окно для редактирования сотрудника -->
   <div v-if="isEditModalOpen" class="fixed inset-0 bg-opacity-50 flex items-center justify-center">
   <div class="bg-white p-6 rounded-lg shadow-lg w-[400px]">
@@ -220,8 +222,6 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh-employees', 'delete-employee'])
 
-const isModalOpen = ref(false)
-
 const newEmployee = ref({
   full_name: '',
   position: '',
@@ -254,6 +254,8 @@ const availableTeams = computed(() => {
   return teams
 })
 
+const isModalOpen = ref(false)
+
 const openAddEmployeeModal = () => {
   isModalOpen.value = true
 }
@@ -285,6 +287,8 @@ watch(
   }
 )
 
+const base_url = 'http://127.0.0.1:8000/api/'
+
 const addEmployee = async () => {
   const formData = new FormData()
   formData.append('full_name', newEmployee.value.full_name)
@@ -297,7 +301,7 @@ const addEmployee = async () => {
     formData.append('photo', newEmployee.value.photo)
   }
 
-  const response = await axios.post('http://127.0.0.1:8000/api/employees/', formData, {
+  const response = await axios.post(`${base_url}employees/`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -308,7 +312,7 @@ const addEmployee = async () => {
   const employeeId = response.data.id 
   
   const teamId = newEmployee.value.team
-  await axios.patch(`http://127.0.0.1:8000/api/teams/${teamId}/add-member/`, {
+  await axios.patch(`${base_url}teams/${teamId}/add-member/`, {
     member_id: employeeId,
   })
   
@@ -355,13 +359,12 @@ const saveEditedEmployee = async () => {
       formData.append('photo', editedFile.value)
     }
 
-  const response = await axios.put(`http://127.0.0.1:8000/api/employees/${editedEmployee.value.id}/`, formData, {
+  const response = await axios.put(`${base_url}employees/${editedEmployee.value.id}/`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   })
 
-        // Обновляем локальный массив
   const index = localEmployees.value.findIndex(emp => emp.id === editedEmployee.value.id)
 
   if (index !== -1) {
@@ -376,10 +379,10 @@ const saveEditedEmployee = async () => {
 const selectedOrdering = ref(null)
 
 const orderingOptions = [
-  { value: 'http://127.0.0.1:8000/api/employees/?ordering=date_of_birth', label: 'Дата рождения (возрастание)' },
-  { value: 'http://127.0.0.1:8000/api/employees/?ordering=-date_of_birth', label: 'Дата рождения (убывание)' },
-  { value: 'http://127.0.0.1:8000/api/employees/?ordering=start_date', label: 'Дата начала работы (возрастание)' },
-  { value: 'http://127.0.0.1:8000/api/employees/?ordering=-start_date', label: 'Дата начала работы (убывание)' },
+  { value: `${base_url}employees/?ordering=date_of_birth`, label: 'Дата рождения (возрастание)' },
+  { value: `${base_url}employees/?ordering=-date_of_birth`, label: 'Дата рождения (убывание)' },
+  { value: `${base_url}employees/?ordering=start_date`, label: 'Дата начала работы (возрастание)' },
+  { value: `${base_url}employees/?ordering=-start_date`, label: 'Дата начала работы (убывание)' },
 ]
 
 
@@ -403,11 +406,11 @@ const resetOrderingFiltering = () => {
 const selectedFilter = ref(null)
 
 const filteringOptions = [
-  {value: 'http://127.0.0.1:8000/api/employees/?search=Инженер', label: 'Инженер'},
-  {value: 'http://127.0.0.1:8000/api/employees/?search=Старший&инженер', label: 'Старший инженер'},
-  {value: 'http://127.0.0.1:8000/api/employees/?search=Разработчик', label: 'Разработчик'},
-  {value: 'http://127.0.0.1:8000/api/employees/?search=Архитектор ПО', label: 'Архитектор ПО'},
-  {value: 'http://127.0.0.1:8000/api/employees/?search=Руководитель', label: 'Руководитель'},
+  {value: `${base_url}employees/?search=Инженер`, label: 'Инженер'},
+  {value: `${base_url}employees/?search=Старший инженер`, label: 'Старший инженер'},
+  {value: `${base_url}employees/?search=Разработчик`, label: 'Разработчик'},
+  {value: `${base_url}employees/?search=Архитектор ПО`, label: 'Архитектор ПО'},
+  {value: `${base_url}employees/?search=Руководитель`, label: 'Руководитель'},
 ]
 
 const filterEmployees = async () => {
@@ -423,3 +426,13 @@ const filterEmployees = async () => {
 }
 
 </script>
+
+<style>
+
+.scrollable-content {
+  overflow-y: auto; /* Добавляем прокрутку по вертикали */
+  height: 100vh;
+  overscroll-behavior: contain;
+}
+
+</style>

@@ -96,6 +96,8 @@ const openForm = (mode) => {
   contextMenu.value.visible = false
 }
 
+const base_url = 'http://127.0.0.1:8000/api/'
+
 const submitForm = async () => {
   if (formMode.value === 'add') {
     let parentKey = ''
@@ -118,11 +120,11 @@ const submitForm = async () => {
         return
     }
 
-    const url = `http://127.0.0.1:8000/api/${childKey}s/`
+    const url = `${base_url}${childKey}s/`
     await axios.post(url, { name: form.value.name, [parentKey]: selectedNode.value.id })
   } 
   else if (formMode.value === 'edit') {
-    const url = `http://127.0.0.1:8000/api/${selectedNode.value.type}s/${selectedNode.value.id}/`
+    const url = `${base_url}${selectedNode.value.type}s/${selectedNode.value.id}/`
     await axios.patch(url, { name: form.value.name })
   }
   
@@ -133,7 +135,10 @@ const submitForm = async () => {
   const deleteNode = async () => {
     if (!selectedNode.value) return
 
-    const url = `http://127.0.0.1:8000/api/${selectedNode.value.type}s/${selectedNode.value.id}/`
+    const confirmed = window.confirm('Вы действительно хотите удалить данное подразделение?')
+    if (!confirmed) return
+
+    const url = `${base_url}${selectedNode.value.type}s/${selectedNode.value.id}/`
     await axios.delete(url)
     
     emit('refresh-tree', expandedKeys.value)
@@ -151,6 +156,7 @@ const submitForm = async () => {
   })
 
 </script>
+
 <style>
   .el-tree-node__content{
       color: black !important;

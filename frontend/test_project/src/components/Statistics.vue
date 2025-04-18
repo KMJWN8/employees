@@ -50,4 +50,5 @@ function getPlural(number, words) {
       : cases[Math.min(number % 10, 5)]
   ]
 }
+
 </script>

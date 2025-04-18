@@ -16,14 +16,12 @@
       <p class="text-sm text-gray-600"><strong>Место работы:</strong> {{ employee.team }}</p>
     </div>
     <div class="flex flex-col gap-2">
-      <!-- Кнопка редактирования -->
       <img
         @click="editEmployee"
         src="@/assets/icons/edit_icon.png"
         alt="Редактировать"
         class="cursor-pointer hover:opacity-75 transition-opacity rounded-md w-5 h-5"
       />
-      <!-- Кнопка удаления -->
       <img
         @click="deleteEmployee"
         src="@/assets/icons/delete_icon.png"
@@ -60,15 +58,18 @@ const getPhotoUrl = (photoPath) => {
   if (!photoPath) return null
   let url = photoPath.startsWith('http') ? photoPath : `http://127.0.0.1:8000${photoPath}`
   const timestamp = new Date().getTime();
-  return `${url}?${timestamp}` // Добавляем уникальный параметр
+  return `${url}?${timestamp}`
 }
 
 const deleteEmployee = async () => {
+  const confirmed = window.confirm('Вы действительно хотите удалить этого сотрудника?')
+  if (!confirmed) return
   await axios.delete(`http://127.0.0.1:8000/api/employees/${props.employee.id}/`)
-  emit('delete-employee', props.employee.id) // Уведомляем родителя об удалении
+  emit('delete-employee', props.employee.id)
 }
 
 const editEmployee = () => {
-  emit('edit-employee', props.employee) // Уведомляем родителя о редактировании
+  emit('edit-employee', props.employee)
 }
+
 </script>

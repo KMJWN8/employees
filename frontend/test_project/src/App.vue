@@ -24,13 +24,11 @@
         </el-aside>
         <el-main>
           <Statistics v-if="selectedEmployees.length" :statistics="currentStatistics" />
-          <div class="scrollable-content">
             <EmployeeList 
             :employees="selectedEmployees"
             :selected-node="selectedNode"
             @refresh-employees="fetchData" 
             />
-          </div>
         </el-main>
       </el-container>
     </el-container>
@@ -72,8 +70,10 @@ const transformData = (apiData) => {
   }))
 }
 
+const base_url = 'http://127.0.0.1:8000/api/'
+
 const fetchData = async (expandedKeys = []) => {
-  const response = await axios.get('http://127.0.0.1:8000/api/services/')
+  const response = await axios.get(`${base_url}services/`)
   treeData.value = transformData(response.data)
   expandedKeys.forEach(key => expandedKeys.value.push(key))
 }
@@ -83,23 +83,23 @@ const selectedEmployees = ref([])
 const currentStatistics = ref(null)
 
 const onNodeSelected = async (node) => {
-  selectedNode.value = node // Сохраняем выбранный узел
+  selectedNode.value = node
   selectedEmployees.value = collectEmployees(node)
 
   let url = ''
     // Формируем URL в зависимости от типа узла
   switch (node.type) {
     case 'service':
-      url = `http://127.0.0.1:8000/api/services/${node.id}/statistics/`
+      url = `${base_url}services/${node.id}/statistics/`
       break
     case 'department':
-      url = `http://127.0.0.1:8000/api/departments/${node.id}/statistics/`
+      url = `${base_url}departments/${node.id}/statistics/`
       break
     case 'division':
-      url = `http://127.0.0.1:8000/api/divisions/${node.id}/statistics/`
+      url = `${base_url}divisions/${node.id}/statistics/`
       break
     case 'team':
-      url = `http://127.0.0.1:8000/api/teams/${node.id}/statistics/`
+      url = `${base_url}teams/${node.id}/statistics/`
       break
     default:
       console.error('Неизвестный тип узла:', node.type)
@@ -113,33 +113,27 @@ const onNodeSelected = async (node) => {
 
 // Рекурсивный сбор сотрудников
 const collectEmployees = (node) => {
-    const employees = []
-    const seenIds = new Set()
+  const employees = []
 
-    function recurse(currentNode) {
-        if (currentNode.members) {
-            currentNode.members.forEach(member => {
-                if (!seenIds.has(member.id)) {
-                    employees.push(member)
-                    seenIds.add(member.id)
-                }
-            })
-        }
-
-        if (currentNode.children) {
-            currentNode.children.forEach(child => recurse(child))
-        }
+  function recurse(currentNode) {
+    if (currentNode.members) {
+        currentNode.members.forEach(member => employees.push(member))
     }
 
-    recurse(node)
-    return employees
+    if (currentNode.children) {
+        currentNode.children.forEach(child => recurse(child))
+    }
+  }
+
+  recurse(node)
+  return employees
 }
 
 const searchQuery = ref('')
 
 const searchEmployees = async () => {
-  const response = await axios.get(`http://127.0.0.1:8000/api/employees/?search=${searchQuery.value}`)
-  selectedEmployees.value = response.data;
+  const response = await axios.get(`${base_url}employees/?search=${searchQuery.value}`)
+  selectedEmployees.value = response.data
 }
 
 // Вызов функции загрузки данных при инициализации
@@ -148,6 +142,7 @@ fetchData()
 </script>
 
 <style>
+
 .el-aside{
   width: fit-content !important;
   transition: width 0.3s ease-in-out !important;
@@ -163,4 +158,5 @@ fetchData()
 .el-container{
   overflow: hidden;
 }
+
 </style>

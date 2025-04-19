@@ -47,7 +47,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
       <!-- Карточки сотрудников -->
       <EmployeeCard
-        v-for="employee in localEmployees"
+        v-for="employee in paginatedEmployees"
         :key="employee.id"
         :employee="employee"
         @delete-employee="deleteEmployee"
@@ -58,6 +58,27 @@
 
     <div v-if="!localEmployees.length && selectedNode" class="text-center text-gray-500">
       <p class="mt-5">Нет сотрудников в этом подразделении.</p>
+    </div>
+
+    <!-- Пагинация -->
+    <div v-if="localEmployees.length>itemsOnPage" class="flex justify-center mt-4">
+      <button
+        @click="previousPage"
+        :disabled="currentPage === 1"
+        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+      >
+        Назад
+      </button>
+      <span class="py-2 px-4 bg-gray-200 flex items-center">
+        Страница {{ currentPage }} из {{ totalPages }}
+      </span>
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+      >
+        Вперед
+      </button>
     </div>
 
     <!-- Модальное окно для добавления сотрудника -->
@@ -279,7 +300,6 @@ const resetForm = () => {
 
 const localEmployees = ref([...props.employees])
 
-// Наблюдаем за изменениями props.employees
 watch(
   () => props.employees,
   (newEmployees) => {
@@ -287,6 +307,12 @@ watch(
   }
 )
 
+watch(
+  () => props.selectedNode,
+  () => {
+    currentPage.value = 1
+  }
+)
 const base_url = 'http://127.0.0.1:8000/api/'
 
 const addEmployee = async () => {
@@ -423,6 +449,32 @@ const filterEmployees = async () => {
   )
 
   localEmployees.value = commonElements
+}
+
+
+const currentPage = ref(1) // Текущая страница
+const itemsOnPage = ref(6) // Количество элементов на странице
+
+const paginatedEmployees = computed(() => {
+  const start = (currentPage.value - 1) * itemsOnPage.value
+  const end = start + itemsOnPage.value
+  return localEmployees.value.slice(start, end)
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(localEmployees.value.length / itemsOnPage.value)
+})
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const previousPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
 }
 
 </script>
